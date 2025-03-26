@@ -25,7 +25,7 @@ let macroDefinitions: [CSetting] = [
     "WASM_ENABLE_LIB_WASI_THREADS": "1",
     
     "WASM_ENABLE_JIT": "1",
-    //"WASM_ENABLE_MEMORY64": "1",
+    "WASM_ENABLE_MEMORY64": "1",
     //"WASM_ENABLE_REF_TYPES": "1",
     //"WASM_ENABLE_STRINGREF": "1",
     //"WASM_ENABLE_GC": "1",
@@ -203,16 +203,9 @@ let wamrCoreDependencies: [Target.Dependency] = [
     .target(name: "wamr-core-darwin", condition: .when(platforms: [.macOS, .iOS, .tvOS, .watchOS])),
 ]
 
-let package = Package(name: "WAMR", products: [
-    .executable(name: "Application", targets: ["Application"]),
+let package = Package(name: "wamr", products: [
     .library(name: "wamr", targets: ["wamr"])
-], dependencies: [
-    .package(url: "https://github.com/purpln/libc.git", branch: "main"),
 ], targets: wamrTargets + [
-    .executableTarget(name: "Application", dependencies: [
-        .product(name: "LibC", package: "libc"),
-        .target(name: "wamr"),
-    ]),
     .target(name: "wamr", dependencies: [.target(name: "wamr-core")]),
     .target(name: "wamr-core", dependencies: wamrCoreDependencies),
 ])
