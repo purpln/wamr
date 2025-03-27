@@ -38,6 +38,7 @@ let headerSearchPaths: [CSetting] = [
     "wamr/core/iwasm/libraries/libc-builtin",
     "wamr/core/iwasm/libraries/lib-pthread",
     "wamr/core/iwasm/libraries/thread-mgr",
+    "wamr/core/shared/platform/common/posix",
     "wamr/core/shared/platform/common/libc-util",
     "wamr/core/shared/platform/include",
     "wamr/core/shared/mem-alloc",
@@ -148,6 +149,7 @@ var sources: [String] = [
     "wamr/core/iwasm/libraries/libc-wasi",
     "wamr/core/iwasm/libraries/thread-mgr",
     "wamr/core/shared/mem-alloc",
+    "wamr/core/shared/platform/common/posix",
     "wamr/core/shared/utils",
     
     "wamr/core/shared/platform/common/libc-util",
@@ -159,29 +161,24 @@ var sources: [String] = [
 let target: Target = .target(name: "wamr", exclude: exclude + [
     "wamr/core/shared/platform/android/shared_platform.cmake",
 ], sources: sources + [
-    "wamr/core/shared/platform/common/posix",
     "wamr/core/shared/platform/android",
     "invokeNative.c",
 ], cSettings: settings + [
     .define("BH_PLATFORM_ANDROID", to: "1"),
-    .headerSearchPath("wamr/core/shared/platform/common/posix"),
     .headerSearchPath("wamr/core/shared/platform/android"),
 ])
 #elseif LINUX
 let target: Target = .target(name: "wamr", exclude: exclude + [
     "wamr/core/shared/platform/linux/shared_platform.cmake",
 ], sources: sources + [
-    "wamr/core/shared/platform/common/posix",
     "wamr/core/shared/platform/linux",
     "invokeNative.c",
 ], cSettings: settings + [
     .define("BH_PLATFORM_LINUX", to: "1"),
-    .headerSearchPath("wamr/core/shared/platform/common/posix"),
     .headerSearchPath("wamr/core/shared/platform/linux"),
 ])
 #elseif WINDOWS
 let target: Target = .target(name: "wamr", exclude: exclude + [
-    "wamr/core/shared/platform/common/posix",
     "wamr/core/shared/platform/windows/shared_platform.cmake",
 ], sources: sources + [
     "wamr/core/shared/platform/windows",
@@ -194,12 +191,10 @@ let target: Target = .target(name: "wamr", exclude: exclude + [
 let target: Target = .target(name: "wamr", exclude: exclude + [
     "wamr/core/shared/platform/darwin/shared_platform.cmake",
 ], sources: sources + [
-    "wamr/core/shared/platform/common/posix",
     "wamr/core/shared/platform/darwin",
     "invokeNative.s",
 ], cSettings: settings + [
     .define("BH_PLATFORM_DARWIN", to: "1"),
-    .headerSearchPath("wamr/core/shared/platform/common/posix"),
     .headerSearchPath("wamr/core/shared/platform/darwin"),
 ])
 #endif
