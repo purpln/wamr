@@ -181,6 +181,7 @@ let target: Target = .target(name: "wamr", exclude: exclude + [
 ])
 #elseif WINDOWS
 let target: Target = .target(name: "wamr", exclude: exclude + [
+    "wamr/core/shared/platform/common/posix",
     "wamr/core/shared/platform/windows/shared_platform.cmake",
 ], sources: sources + [
     "wamr/core/shared/platform/windows",
