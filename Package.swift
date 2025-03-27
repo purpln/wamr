@@ -157,16 +157,8 @@ var sources: [String] = [
     "wamr/core/iwasm/libraries/lib-wasi-threads",
 ]
 
-let products: [Product] = [
-    .library(name: "wamr", targets: ["wamr"]),
-]
-
-let targets: [Target] = [
-    .target(name: "wamr", dependencies: [.target(name: "wamr-core")]),
-]
-
 #if ANDROID
-let target: Target = .target(name: "wamr-core-linux", exclude: exclude + [
+let target: Target = .target(name: "wamr", exclude: exclude + [
     "wamr/core/shared/platform/android/shared_platform.cmake",
 ], sources: sources + [
     "wamr/core/shared/platform/android",
@@ -175,9 +167,8 @@ let target: Target = .target(name: "wamr-core-linux", exclude: exclude + [
     .define("BH_PLATFORM_ANDROID", to: "1"),
     .headerSearchPath("wamr/core/shared/platform/android"),
 ])
-let dependency: Target.Dependency = .target(name: "wamr-core-linux")
 #elseif LINUX
-let target: Target = .target(name: "wamr-core-linux", exclude: exclude + [
+let target: Target = .target(name: "wamr", exclude: exclude + [
     "wamr/core/shared/platform/linux/shared_platform.cmake",
 ], sources: sources + [
     "wamr/core/shared/platform/linux",
@@ -186,9 +177,18 @@ let target: Target = .target(name: "wamr-core-linux", exclude: exclude + [
     .define("BH_PLATFORM_LINUX", to: "1"),
     .headerSearchPath("wamr/core/shared/platform/linux"),
 ])
-let dependency: Target.Dependency = .target(name: "wamr-core-linux")
+#elseif WINDOWS
+let target: Target = .target(name: "wamr", exclude: exclude + [
+    "wamr/core/shared/platform/windows/shared_platform.cmake",
+], sources: sources + [
+    "wamr/core/shared/platform/windows",
+    "invokeNative.c",
+], cSettings: settings + [
+    .define("BH_PLATFORM_WINDOWS", to: "1"),
+    .headerSearchPath("wamr/core/shared/platform/windows"),
+])
 #else //APPLE
-let target: Target = .target(name: "wamr-core-darwin", exclude: exclude + [
+let target: Target = .target(name: "wamr", exclude: exclude + [
     "wamr/core/shared/platform/darwin/shared_platform.cmake",
 ], sources: sources + [
     "wamr/core/shared/platform/darwin",
@@ -197,9 +197,8 @@ let target: Target = .target(name: "wamr-core-darwin", exclude: exclude + [
     .define("BH_PLATFORM_DARWIN", to: "1"),
     .headerSearchPath("wamr/core/shared/platform/darwin"),
 ])
-let dependency: Target.Dependency = .target(name: "wamr-core-darwin")
 #endif
 
-let package = Package(name: "wamr", products: products, targets: targets + [
-    .target(name: "wamr-core", dependencies: [dependency]), target
-])
+let package = Package(name: "wamr", products: [
+    .library(name: "wamr", targets: ["wamr"]),
+], targets: [target])
