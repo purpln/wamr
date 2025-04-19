@@ -1,5 +1,4 @@
 module wamr {
-    header "../../../third-party/wasm-micro-runtime/core/iwasm/include/wasm_c_api.h"
-    header "../../../third-party/wasm-micro-runtime/core/iwasm/include/wasm_export.h"
+    header "wamr.h"
     export *
 }

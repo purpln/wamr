@@ -2,43 +2,52 @@
 
 import PackageDescription
 
-let apple: [Platform] = [.macOS, .iOS, .tvOS, .watchOS]
+let config: [CSetting] = [
+    "WASM_ENABLE_SHARED_MEMORY",
+    "WASM_ENABLE_BULK_MEMORY",
+    "WASM_ENABLE_MEMORY64",
+    
+    "WASM_ENABLE_INTERP",
+    "WASM_ENABLE_FAST_INTERP",
+    "WASM_ENABLE_TAIL_CALL",
+    "WASM_ENABLE_REF_TYPES",
+    "WASM_ENABLE_JIT",
+    
+    "WASM_ENABLE_LIBC_BUILTIN",
+    "WASM_ENABLE_LIB_PTHREAD",
+    "WASM_ENABLE_LIB_PTHREAD_SEMAPHORE",
+    "WASM_ENABLE_QUICK_AOT_ENTRY",
+    "WASM_ENABLE_THREAD_MGR",
+    
+    "WASM_ENABLE_MODULE_INST_CONTEXT",
+    "WASM_ENABLE_LIBC_WASI",
+    "WASM_ENABLE_LIB_WASI_THREADS",
+    
+    "WASM_ENABLE_CUSTOM_NAME_SECTION",
+    "WASM_ENABLE_DUMP_CALL_STACK",
+    "WASM_ENABLE_PERF_PROFILING",
+    "WASM_ENABLE_MEMORY_PROFILING",
+    "WASM_ENABLE_LOAD_CUSTOM_SECTION",
+    
+    "WASM_ENABLE_GC",
+    "WASM_ENABLE_STRINGREF",
+    "WASM_ENABLE_MULTI_MODULE",
+].map({ .define($0, to: "1") })
 
 let macroDefinitions: [CSetting] = [
     "BH_MALLOC": "wasm_runtime_malloc",
     "BH_FREE": "wasm_runtime_free",
-    //"WASM_ENABLE_AOT": "1",
-    "WASM_ENABLE_BULK_MEMORY": "1",
-    "WASM_ENABLE_FAST_INTERP": "1",
-    "WASM_ENABLE_INTERP": "1",
-    "WASM_ENABLE_LIBC_BUILTIN": "1",
-    "WASM_ENABLE_LIB_PTHREAD": "1",
-    "WASM_ENABLE_LIB_PTHREAD_SEMAPHORE": "1",
-    "WASM_ENABLE_QUICK_AOT_ENTRY": "1",
-    "WASM_ENABLE_SHARED_MEMORY": "1",
-    "WASM_ENABLE_THREAD_MGR": "1",
-    
-    "WASM_ENABLE_MODULE_INST_CONTEXT": "1",
-    "WASM_ENABLE_LIBC_WASI": "1",
-    "WASM_ENABLE_LIB_WASI_THREADS": "1",
-    
-    "WASM_ENABLE_JIT": "1",
-    //"WASM_ENABLE_MEMORY64": "1",
-    
-    //"WASM_ENABLE_SIMD": "1",
-    //"WASM_ENABLE_REF_TYPES": "1",
-    //"WASM_ENABLE_STRINGREF": "1",
-    //"WASM_ENABLE_GC": "1",
 ].map({ .define($0.key, to: $0.value) })
 
 let headerSearchPaths: [CSetting] = [
     "wamr/core/iwasm/common",
+    "wamr/core/iwasm/common/gc",
+    "wamr/core/iwasm/common/gc/stringref",
     "wamr/core/iwasm/include",
     "wamr/core/iwasm/interpreter",
     "wamr/core/iwasm/libraries/libc-builtin",
     "wamr/core/iwasm/libraries/lib-pthread",
     "wamr/core/iwasm/libraries/thread-mgr",
-    "wamr/core/shared/platform/common/posix",
     "wamr/core/shared/platform/common/libc-util",
     "wamr/core/shared/platform/include",
     "wamr/core/shared/mem-alloc",
@@ -48,7 +57,8 @@ let headerSearchPaths: [CSetting] = [
     "wamr/core/iwasm/libraries/libc-wasi/sandboxed-system-primitives/src",
 ].map({ .headerSearchPath($0) })
 
-let settings: [CSetting] = macroDefinitions + headerSearchPaths
+let debug: [CSetting] = [.define("BH_DEBUG", to: "1", .when(configuration: .debug))]
+let settings: [CSetting] = config + macroDefinitions + headerSearchPaths + debug
 
 let exclude: [String] = [
     "wamr/ATTRIBUTIONS.md",
@@ -83,10 +93,8 @@ let exclude: [String] = [
     "wamr/core/iwasm/common/SConscript",
     "wamr/core/iwasm/common/arch",
     "wamr/core/iwasm/common/iwasm_common.cmake",
-    "wamr/core/iwasm/common/gc",
-    //"wamr/core/iwasm/common/gc/iwasm_gc.cmake",
-    //"wamr/core/iwasm/common/gc/gc_common.c",
-    //"wamr/core/iwasm/common/gc/stringref",
+    //"wamr/core/iwasm/common/gc",
+    "wamr/core/iwasm/common/gc/iwasm_gc.cmake",
     "wamr/core/iwasm/compilation",
     "wamr/core/iwasm/interpreter/SConscript",
     "wamr/core/iwasm/interpreter/iwasm_interp.cmake",
@@ -143,17 +151,17 @@ let exclude: [String] = [
 
 var sources: [String] = [
     "wamr/core/iwasm/common",
+    "wamr/core/iwasm/common/gc",
+    "wamr/core/iwasm/common/gc/stringref",
     "wamr/core/iwasm/interpreter",
     "wamr/core/iwasm/libraries/lib-pthread",
     "wamr/core/iwasm/libraries/libc-builtin",
     "wamr/core/iwasm/libraries/libc-wasi",
     "wamr/core/iwasm/libraries/thread-mgr",
     "wamr/core/shared/mem-alloc",
-    "wamr/core/shared/platform/common/posix",
     "wamr/core/shared/utils",
     
     "wamr/core/shared/platform/common/libc-util",
-    "wamr/core/shared/platform/common/memory",
     "wamr/core/iwasm/libraries/lib-wasi-threads",
 ]
 
@@ -161,24 +169,32 @@ var sources: [String] = [
 let target: Target = .target(name: "wamr", exclude: exclude + [
     "wamr/core/shared/platform/android/shared_platform.cmake",
 ], sources: sources + [
+    "wamr/core/shared/platform/common/posix",
     "wamr/core/shared/platform/android",
     "invokeNative.c",
 ], cSettings: settings + [
+    .define("WASM_HAVE_MREMAP", to: "1"),
     .define("BH_PLATFORM_ANDROID", to: "1"),
+    .headerSearchPath("wamr/core/shared/platform/common/posix"),
     .headerSearchPath("wamr/core/shared/platform/android"),
 ])
 #elseif LINUX
 let target: Target = .target(name: "wamr", exclude: exclude + [
     "wamr/core/shared/platform/linux/shared_platform.cmake",
 ], sources: sources + [
+    "wamr/core/shared/platform/common/posix",
+    "wamr/core/shared/platform/common/memory",
     "wamr/core/shared/platform/linux",
     "invokeNative.c",
 ], cSettings: settings + [
+    //.define("WASM_HAVE_MREMAP", to: "1"),
     .define("BH_PLATFORM_LINUX", to: "1"),
+    .headerSearchPath("wamr/core/shared/platform/common/posix"),
     .headerSearchPath("wamr/core/shared/platform/linux"),
 ])
 #elseif WINDOWS
 let target: Target = .target(name: "wamr", exclude: exclude + [
+    "wamr/core/shared/platform/common/memory",
     "wamr/core/shared/platform/windows/shared_platform.cmake",
 ], sources: sources + [
     "wamr/core/shared/platform/windows",
@@ -191,10 +207,13 @@ let target: Target = .target(name: "wamr", exclude: exclude + [
 let target: Target = .target(name: "wamr", exclude: exclude + [
     "wamr/core/shared/platform/darwin/shared_platform.cmake",
 ], sources: sources + [
+    "wamr/core/shared/platform/common/posix",
+    "wamr/core/shared/platform/common/memory",
     "wamr/core/shared/platform/darwin",
     "invokeNative.s",
 ], cSettings: settings + [
     .define("BH_PLATFORM_DARWIN", to: "1"),
+    .headerSearchPath("wamr/core/shared/platform/common/posix"),
     .headerSearchPath("wamr/core/shared/platform/darwin"),
 ])
 #endif
